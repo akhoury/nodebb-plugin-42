@@ -71,7 +71,7 @@
                     li.append(navMinusIcon);
                     list.append(li);
 				};
-			})(form.find('ul.navigation-42-link-list'), $(form.find('navigation-remove-html-holder').html()));
+			})(form.find('ul.navigation-42-link-list'), form.find('navigation-remove-html-holder').html());
 
 			form.find('.navigation-42-add').on('click', function(e){
 				var list = form.find('ul.navigation-42-link-list');
