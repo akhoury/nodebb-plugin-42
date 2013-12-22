@@ -1,0 +1,29 @@
+{
+	"name": "nodebb-plugin-42",
+	"version": "0.0.1",
+	"description": "customizing header and footer lil bit",
+	"main": "42.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/akhoury/nodebb-plugin-42"
+	},
+	"keywords": [
+		"nodebb",
+		"plugin",
+		"42",
+		"custom",
+		"header",
+		"footer"
+	],
+	"author": {
+		"name": "Aziz khoury",
+		"email": "bentael@gmail.com"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/akhoury/nodebb-plugin-42"
+	}
+}

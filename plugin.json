@@ -1,0 +1,20 @@
+{
+	"id": "nodebb-plugin-42",
+	"name": "42",
+	"description": "customizing header and footer lil bit",
+	"url": "https://github.com/akhoury/nodebb-plugin-42",
+	"library": "./42.js",
+	"staticDir": "./public",
+	"css": [
+		"css/default.css"
+	],
+	"hooks": [
+		{ "hook": "filter:header.build", "method": "header", "callbacked": false },
+		{ "hook": "filter:footer.build", "method": "footer", "callbacked": false },
+		{ "hook": "filter:server.create_routes", "method": "routes", "callbacked": true },
+		{ "hook": "filter:admin.header.build", "method": "admin.menu", "callbacked": false },
+		{ "hook": "filter:admin.create_routes", "method": "admin.route", "callbacked": true },
+		{ "hook": "action:plugin.activate", "method": "admin.activate" },
+		{ "hook": "action:config.set", "method": "reload" }
+	]
+}
