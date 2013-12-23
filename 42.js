@@ -1,58 +1,75 @@
 var	fs = require('fs'),
 	path = require('path'),
+	async = require('async'),
 	meta = module.parent.require('./meta'),
 
 	FortyTwo = {
 		config: {},
 		init: function() {
-			console.log('init');
 
 			var	_self = this,
+
 				fields = [
 					'brandLink',
-					'navigation'
+					'navigation',
+					'footerHtml'
 				],
+
 				defaults = {
 					'brandLink': '',
-					'navigation': '[]'
+					'navigation': '[]',
+					'footerHtml': ''
 				},
+
 				hashes = fields.map(function(field) { return 'nodebb-plugin-42:options:' + field });
 
 			meta.configs.getFields(hashes, function(err, options) {
-				var	option;
-				for(field in options) {
-					if (options.hasOwnProperty(field)) {
-						option = field.slice(25);
+				if (err) throw err;
 
-						if (!options[field]) {
-							_self.config[option] = defaults[option];
-						} else {
-
-						}
-					}
+				var option;
+				for (field in options) {
+						option = field.slice('nodebb-plugin-42:options:'.length);
+						_self.config[option] = option == 'navigation' ? JSON.parse(options[field] || defaults[option]) : options[field] || defaults[option];
 				}
 			});
 		},
 		reload: function(hookVals) {
-			console.log('reload');
-			var	is42Plugin = /^nodebb-plugin-42/;
+			var	is42Plugin = /^nodebb-plugin-42:options:brandLink/;
 			if (is42Plugin.test(hookVals.key)) {
 				this.init();
 			}
 		},
 		header: function(custom_header, callback) {
-			console.log('header');
+			(this.config.navigation || []).forEach(function(item, i){
+				custom_header.navigation.push({
+					"class": item.class || '',
+					"route": item.href,
+					"text": item.text
+				});
+			});
 			return custom_header;
 		},
 
-		footer: function(custom_footer, callback) {
-			console.log('footer');
+		footer: function(custom_footer, callback, a, b, c) {
+			console.log('custom_footer');
+			console.log(custom_footer);
+			console.log('a');
+			console.log(a);
+			console.log('b');
+			console.log(b);
+			console.log('c');
+			console.log(c);
+
+			custom_footer = this.config.footerHtml || '';
+			console.log('custom_footer-2');
+			console.log(custom_footer);
+			console.log(callback);
+
 			return custom_footer;
 		},
 
 		admin: {
 			menu: function(custom_header, callback) {
-				console.log('admin.menu');
 				custom_header.plugins.push({
 					"route": '/plugins/42',
 					"icon": 'icon-edit',
@@ -62,7 +79,6 @@ var	fs = require('fs'),
 				return custom_header;
 			},
 			route: function(custom_routes, callback) {
-				console.log('admin.route');
 				fs.readFile(path.join(__dirname, 'public/templates/admin.tpl'), function(err, tpl) {
 					if (err) console.log(err);
 
@@ -84,11 +100,11 @@ var	fs = require('fs'),
 				});
 			},
 			activate: function(id) {
-				console.log('admin.activate');
 				if (id === 'nodebb-plugin-42') {
 					var defaults = [
 						{ field: 'brandLink', value: '' },
-						{ field: 'navigation', value: '[]' }
+						{ field: 'navigation', value: '[]' },
+						{ field: 'footerHtml', value: '' }
 					];
 
 					async.each(defaults, function(optObj, next) {
