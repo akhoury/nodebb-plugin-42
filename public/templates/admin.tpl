@@ -54,9 +54,9 @@
 <form class="form" id="form-42">
 
 	<div class="form-group">
-		<label for="brandLink">
+		<label for="brandUrl">
 			<p>Replace the NodeBB brand Link *</p>
-            <input class="form-control" type="text" placeholder="http://site.com" data-field="nodebb-plugin-42:options:brandLink" id="brandLink" />
+            <input class="form-control" type="text" placeholder="http://site.com" data-field="nodebb-plugin-42:options:brandUrl" id="brandUrl" />
 			<div class="note-42">leave blank to keep the NodeBB's default</div>
 		</label>
 	</div>
@@ -88,7 +88,7 @@
 
 	<div class="form-group">
     	<label for="footerHtml">
-    		<p>Append custom HTML to the footer</p>
+    		<p>Prepend custom HTML to the footer</p>
             <textarea class="form-control" data-field="nodebb-plugin-42:options:footerHtml" id="footerHtml" name="code">
 
             </textarea>

@@ -1,81 +1,74 @@
 var	fs = require('fs'),
+	pluginData = require('./plugin.json'),
 	path = require('path'),
 	async = require('async'),
-	log = require('tiny-logger').init('debug', '[nodebb-plugin-42]'),
+	log = require('tiny-logger').init('debug', '[' + pluginData.id + ']'),
 	meta = module.parent.require('./meta');
 
-(function(FortyTwo) {
+(function(Plugin) {
+	Plugin.config = {};
 
-	FortyTwo.config = {};
-
-	FortyTwo.metaSoftInit = function(callback){
-		log.debug('metaSoftInit()');
-		var fields = [
-				'brandLink',
-				'navigation',
-				'footerHtml'
-			],
-			hashes = fields.map(function(field) { return 'nodebb-plugin-42:options:' + field });
-
+	Plugin.init = function(callback){
+		log.debug('init()');
+		var hashes = Object.keys(pluginData.defaults).map(function(field) { return pluginData.id + ':options:' + field });
 		meta.configs.getFields(hashes, function(err, options){
 			for (field in options) {
-				// i dont feel good about this
 				meta.config[field] = options[field];
 			}
 			callback();
 		});
 	};
 
-	FortyTwo.init = function(callback) {
-		log.debug('init()');
+	Plugin.softInit = function(callback) {
+		log.debug('softInit()');
+
 		var	_self = this,
 			defaults = {
-				'brandLink': '',
-				'navigation': '[]',
-				'footerHtml': ''
+
 			};
 
 		if (!meta.config) {
-			this.metaSoftInit(function(){
-				_self.init(callback);
+			this.init(function() {
+				_self.softInit(callback);
 			});
 		}
 
+		var prefix = pluginData.id + ':options:';
 		Object.keys(meta.config).forEach(function(field, i) {
 			var option, value;
-			if (field.indexOf('nodebb-plugin-42:options:') === 0 ) {
-				option = field.slice('nodebb-plugin-42:options:'.length);
+			if (field.indexOf(pluginData.id + ':options:') === 0 ) {
+				option = field.slice(prefix.length);
 				value = meta.config[field];
 				_self.config[option] = option == 'navigation' ? JSON.parse(value || defaults[option]) : value || defaults[option];
 			}
 		});
-
+		_self.initialized = true;
 		if (typeof callback == 'function') {
 			callback();
 		}
 	};
 
-	FortyTwo.reload = function(hookVals) {
-		var	is42Plugin = /^nodebb-plugin-42:options:brandLink/;
-		if (is42Plugin.test(hookVals.key)) {
-			this.metaSoftInit(this.init.bind(this));
+	Plugin.reload = function(hookVals) {
+		var	isThisPlugin = new RegExp(pluginData.id + ':options:' + Object.keys(pluginData.defaults)[0]);
+		if (isThisPlugin.test(hookVals.key)) {
+			this.init(this.softInit.bind(this));
 		}
 	};
 
-	FortyTwo.header = function(custom_header, callback) {
+	Plugin.header = function(custom_header, callback) {
 		log.debug('header()');
 		var _self = this;
 
 		async.series([
 			function(next) {
-				if (!_self.config.initialized) {
-					_self.init(next);
+				if (!_self.initialized) {
+					_self.softInit(next);
 				} else {
 					next();
 				}
 			},
 			function() {
-				(_self.config.navigation || []).forEach(function(item, i) {
+				(_self.config.navigation || []).forEach(function(item) {
 					custom_header.navigation.push({
 						"class": item.class || '',
 						"route": item.href,
@@ -87,14 +80,14 @@ var	fs = require('fs'),
 		]);
 	};
 
-	FortyTwo.footer = function(custom_footer, callback) {
+	Plugin.footer = function(custom_footer, callback) {
 		log.debug('footer()');
 		var _self = this;
 
 		async.series([
 			function(next) {
-				if (!_self.config.initialized) {
-					_self.init(next);
+				if (!_self.initialized) {
+					_self.softInit(next);
 				} else {
 					next();
 				}
@@ -102,12 +95,16 @@ var	fs = require('fs'),
 			function() {
 				custom_footer = _self.config.footerHtml || '';
 
-				// todo: much hack, so many scared, wow, --doge, 2013
-				if (_self.config.brandLink) {
-					custom_footer += '\n<script>\n\t$(function(){ \n'
-						+ '\t\t$(".navbar-header .forum-logo").parents("a").eq(0).attr("href", "' + _self.config.brandLink + '"); \n'
-						+ '\t\t$(".navbar-header .forum-title").parents("a").eq(0).attr("href", "' + _self.config.brandLink + '"); \n'
-						+ '\t});\n</script>';
+				if (_self.config.brandUrl) {
+					custom_footer += ''
+						+ '\n\n\n\t\t<!-- [' + pluginData.id + '] "much hack, so last minute, so many scared, wow" -doge, 2013. Merry Christmas -->'
+						+ '\n\t\t<script>'
+						+ '\n\t\t\t$(function() {'
+						+ '\n\t\t\t\t$(".navbar-header").find(".forum-logo, .forum-title").each(function(i, el) {'
+						+ '\n\t\t\t\t\t\t$(el).parents("a").eq(0).attr("href", "' + _self.config.brandUrl + '");'
+						+ '\n\t\t\t\t});'
+						+ '\n\t\t\t});'
+						+ '\n\t\t</script>\n\n';
 				}
 
 				callback(null, custom_footer);
@@ -115,12 +112,12 @@ var	fs = require('fs'),
 		]);
 	};
 
-	FortyTwo.admin = {
+	Plugin.admin = {
 		menu: function(custom_header) {
 			custom_header.plugins.push({
-				"route": '/plugins/42',
+				"route": '/plugins/' + pluginData.name,
 				"icon": 'icon-edit',
-				"name": '42'
+				"name": pluginData.name
 			});
 
 			return custom_header;
@@ -130,14 +127,14 @@ var	fs = require('fs'),
 				if (err) console.log(err);
 
 				custom_routes.routes.push({
-					route: '/plugins/42',
+					route: '/plugins/' + pluginData.name,
 					method: "get",
 					options: function(req, res, callback) {
 						callback({
 							req: req,
 							res: res,
-							route: '/plugins/42',
-							name: FortyTwo,
+							route: '/plugins/' + pluginData.name,
+							name: Plugin,
 							content: tpl
 						});
 					}
@@ -148,15 +145,9 @@ var	fs = require('fs'),
 		},
 		activate: function(id) {
 			log.debug('activate()');
-			if (id === 'nodebb-plugin-42') {
-				var defaults = [
-					{ field: 'brandLink', value: '' },
-					{ field: 'navigation', value: '[]' },
-					{ field: 'footerHtml', value: '' }
-				];
-
-				async.each(defaults, function(optObj, next) {
-					meta.configs.setOnEmpty('nodebb-plugin-42:options:' + optObj.field, optObj.value, next);
+			if (id === pluginData.id) {
+				async.each(Object.keys(pluginData.defaults), function(field, next) {
+					meta.configs.setOnEmpty(pluginData.id + ':options:' + field, pluginData.defaults[field], next);
 				});
 			}
 		}

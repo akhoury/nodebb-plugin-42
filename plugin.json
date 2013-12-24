@@ -15,5 +15,11 @@
 		{ "hook": "filter:admin.create_routes", "method": "admin.route", "callbacked": true },
 		{ "hook": "action:plugin.activate", "method": "admin.activate" },
 		{ "hook": "action:config.set", "method": "reload" }
-	]
+	],
+
+	"defaults": {
+		"brandUrl": "",
+		"navigation": "[]",
+		"footerHtml": ""
+	}
 }
