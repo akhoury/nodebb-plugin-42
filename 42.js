@@ -6,7 +6,8 @@ var	fs = require('fs'),
 
 	FortyTwo = {
 		config: {},
-		init: function() {
+
+		init: function(callback) {
 			log.debug('init()');
 			var	_self = this,
 				fields = [
@@ -21,16 +22,19 @@ var	fs = require('fs'),
 				},
 				hashes = fields.map(function(field) { return 'nodebb-plugin-42:options:' + field });
 
-			meta.getFields(hashes, function(err, options) {
+			meta.configs.getFields(hashes, function(err, options) {
 				if (err) throw err;
 				var option;
 				for (field in options) {
-						option = field.slice('nodebb-plugin-42:options:'.length);
-						_self.config[option] = option == 'navigation' ? JSON.parse(options[field] || defaults[option]) : options[field] || defaults[option];
-						log.debug('set ' + options + ' = ' + _self.config.option);
+					option = field.slice('nodebb-plugin-42:options:'.length);
+					_self.config[option] = option == 'navigation' ? JSON.parse(options[field] || defaults[option]) : options[field] || defaults[option];
+				}
+				if (typeof callback == 'function') {
+					callback();
 				}
 			});
 		},
+
 		reload: function(hookVals) {
 			var	is42Plugin = /^nodebb-plugin-42:options:brandLink/;
 			if (is42Plugin.test(hookVals.key)) {
@@ -38,20 +42,56 @@ var	fs = require('fs'),
 				this.init();
 			}
 		},
-		header: function(custom_header) {
-			log.debug('header called');
 
-			if (!this.config.initialized) {
-				this.init();
-			}
+		header: function(custom_header, callback) {
+			var _self = this;
+
+			async.series([
+				function(next) {
+					if (!_self.config.initialized) {
+						_self.init(next);
+					} else {
+						next();
+					}
+				},
+				function() {
+					(_self.config.navigation || []).forEach(function(item, i) {
+						custom_header.navigation.push({
+							"class": item.class || '',
+							"route": item.href,
+							"text": item.text
+						});
+					});
+					callback(null, custom_header);
+				}
+			]);
 		},
 
-		footer: function(custom_footer) {
-			log.debug('footer called');
-			custom_footer = this.config.footerHtml || '';
-			log.debug('custom footer');
-			log.debug(custom_footer);
-			return custom_footer;
+		footer: function(custom_footer, callback) {
+			var _self = this;
+
+			async.series([
+				function(next) {
+					if (!_self.config.initialized) {
+						_self.init(next);
+					} else {
+						next();
+					}
+				},
+				function() {
+					custom_footer = _self.config.footerHtml || '';
+
+					// todo: much hack, so many scared, wow, --doge, 2013
+					if (_self.config.brandLink) {
+						custom_footer += '\n<script>\n\t$(function(){ \n'
+							+ '\t\t$(".navbar-header .forum-logo").parents("a").eq(0).attr("href", "' + _self.config.brandLink + '"); \n'
+							+ '\t\t$(".navbar-header .forum-title").parents("a").eq(0).attr("href", "' + _self.config.brandLink + '"); \n'
+							+ '\t});\n</script>';
+					}
+
+					callback(null, custom_footer);
+				}
+			]);
 		},
 
 		admin: {

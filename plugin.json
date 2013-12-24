@@ -9,8 +9,8 @@
 		"css/default.css"
 	],
 	"hooks": [
-		{ "hook": "filter:header.build", "method": "header", "callbacked": false },
-		{ "hook": "filter:footer.build", "method": "footer", "callbacked": false },
+		{ "hook": "filter:header.build", "method": "header", "callbacked": true },
+		{ "hook": "filter:footer.build", "method": "footer", "callbacked": true },
 		{ "hook": "filter:server.create_routes", "method": "routes", "callbacked": true },
 		{ "hook": "filter:admin.header.build", "method": "admin.menu", "callbacked": false },
 		{ "hook": "filter:admin.create_routes", "method": "admin.route", "callbacked": true },

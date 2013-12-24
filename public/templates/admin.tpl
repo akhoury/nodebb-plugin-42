@@ -68,10 +68,15 @@
 
 			<input type="text" class="form-control navigation-42-link navigation-42-link-text" placeholder="Text" />
 			<input type="text" class="form-control navigation-42-link navigation-42-link-href" placeholder="Url" />
+			<input type="text" class="form-control navigation-42-link navigation-42-link-icon" placeholder="fa-icon" />
+			<input type="text" class="form-control navigation-42-link navigation-42-link-title" placeholder="Title" />
 			<button class="btn btn-sm btn-default navigation-42-link navigation-42-add" type="button" title="Add link">
 				<i class="fa fa-plus"></i>
 			</button>
-			<div class="note-42">Use these to links back your site or blog or whatever, try to limit to 4 or 5, depending on your theme of course</div>
+			<div class="note-42">
+				Use these to links back your site or blog or whatever, try to limit to 4 or 5, depending on your theme of course. <br/>
+				Find the list of icons class at <a href="http://fontawesome.io/icons/" target="_blank">fontawesome.io</a>. You can use an icon, a text or both.
+			</div>
 			<ul class="navigation-42-link-list"></ul>
 
 			<span class="navigation-remove-html-holder hide">
@@ -128,13 +133,24 @@
 			appendNavigationItem = (function(list, navMinusIcon) {
 				var textField = form.find('input.navigation-42-link-text');
 				var hrefField = form.find('input.navigation-42-link-href');
+				var iconField = form.find('input.navigation-42-link-icon');
+				var titleField = form.find('input.navigation-42-link-title');
 
 				return function(link, order) {
+
 					textField.val('');
 					hrefField.val('');
+					iconField.val('');
+					titleField.val('');
+
 				 	var li = $('<li />').addClass('navigation-42-link-item');
 				 	if (order) li.append($('<span />').text(order + '-) '));
-                    li.append($('<a/>').addClass('navigation-42-link-item-a').attr('href', link.href).text(link.text));
+                    var a = $('<a />').addClass('navigation-42-link-item-a').attr('href', link.href).attr('title', link.title);
+
+                    if (link.icon)
+                    	a.append($('<i />').addClass('fa ' + link.icon));
+
+                    li.append(a.append($('<span />').text(link.text)));
                     li.append(navMinusIcon);
                     li.find('.navigation-42-remove').on('click', removeNavigationItem);
                     list.append(li);
@@ -142,21 +158,27 @@
 
 			})(form.find('ul.navigation-42-link-list'), form.find('.navigation-remove-html-holder').html());
 
-			form.find('.navigation-42-add').on('click', function(e){
+			form.find('.navigation-42-add').on('click', function(e) {
 				var list = form.find('ul.navigation-42-link-list');
-				var text = form.find('input.navigation-42-link-text').val();
 
-				form.find('label[for="navigation"] .disabled').removeClass('disabled');
-				if (!text) {
-					form.find('input.navigation-42-link-text').addClass('invalid');
-					return false;
-				}
+				var text = form.find('input.navigation-42-link-text').val();
+				var icon = form.find('input.navigation-42-link-icon').val();
+				var title = form.find('input.navigation-42-link-title').val();
+
+				form.find('label[for="navigation"] .invalid').removeClass('invalid');
+
 				var href = form.find('input.navigation-42-link-href').val();
 				if (!href) {
 					form.find('input.navigation-42-link-href').addClass('invalid');
 					return false;
 				}
-				appendNavigationItem({text: text, href: href}, list.find('li.navigation-42-link-item').length + 1);
+				if (!text && !icon) {
+					form.find('input.navigation-42-link-text').addClass('invalid');
+					form.find('input.navigation-42-link-icon').addClass('invalid');
+					return false;
+				}
+
+				appendNavigationItem({text: text, href: href, icon: icon, title: title}, list.find('li.navigation-42-link-item').length + 1);
 			});
 
 			save42Btn.on('click', function(e) {
@@ -167,7 +189,7 @@
 				items.each(function(i, item) {
 					console.log(i);
 					var a = $(item).find('a.navigation-42-link-item-a');
-                	itemsVal.push({text: a.text(), href: a.attr('href')});
+                	itemsVal.push({text: a.text(), href: a.attr('href'), title: a.attr('title'), icon: (a.find('i').attr('class') || '').split(' ')[1]});
 				});
 				itemsVal = JSON.stringify(itemsVal);
 				form.find('input#navigation').val(itemsVal);
@@ -186,7 +208,7 @@
 
 				if (links && links.length) {
 					links.forEach(function(link, i){
-						appendNavigationItem(link, i+1);
+						appendNavigationItem(link, i + 1);
 					});
 				}
 
