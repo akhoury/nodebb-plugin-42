@@ -1,75 +1,61 @@
 var	fs = require('fs'),
 	path = require('path'),
 	async = require('async'),
+	log = require('tiny-logger').init('debug', '[nodebb-plugin-42]'),
 	meta = module.parent.require('./meta'),
 
 	FortyTwo = {
 		config: {},
 		init: function() {
-
+			log.debug('init()');
 			var	_self = this,
-
 				fields = [
 					'brandLink',
 					'navigation',
 					'footerHtml'
 				],
-
 				defaults = {
 					'brandLink': '',
 					'navigation': '[]',
 					'footerHtml': ''
 				},
-
 				hashes = fields.map(function(field) { return 'nodebb-plugin-42:options:' + field });
 
-			meta.configs.getFields(hashes, function(err, options) {
+			meta.getFields(hashes, function(err, options) {
 				if (err) throw err;
-
 				var option;
 				for (field in options) {
 						option = field.slice('nodebb-plugin-42:options:'.length);
 						_self.config[option] = option == 'navigation' ? JSON.parse(options[field] || defaults[option]) : options[field] || defaults[option];
+						log.debug('set ' + options + ' = ' + _self.config.option);
 				}
 			});
 		},
 		reload: function(hookVals) {
 			var	is42Plugin = /^nodebb-plugin-42:options:brandLink/;
 			if (is42Plugin.test(hookVals.key)) {
+				log.debug('reloading...');
 				this.init();
 			}
 		},
-		header: function(custom_header, callback) {
-			(this.config.navigation || []).forEach(function(item, i){
-				custom_header.navigation.push({
-					"class": item.class || '',
-					"route": item.href,
-					"text": item.text
-				});
-			});
-			return custom_header;
+		header: function(custom_header) {
+			log.debug('header called');
+
+			if (!this.config.initialized) {
+				this.init();
+			}
 		},
 
-		footer: function(custom_footer, callback, a, b, c) {
-			console.log('custom_footer');
-			console.log(custom_footer);
-			console.log('a');
-			console.log(a);
-			console.log('b');
-			console.log(b);
-			console.log('c');
-			console.log(c);
-
+		footer: function(custom_footer) {
+			log.debug('footer called');
 			custom_footer = this.config.footerHtml || '';
-			console.log('custom_footer-2');
-			console.log(custom_footer);
-			console.log(callback);
-
+			log.debug('custom footer');
+			log.debug(custom_footer);
 			return custom_footer;
 		},
 
 		admin: {
-			menu: function(custom_header, callback) {
+			menu: function(custom_header) {
 				custom_header.plugins.push({
 					"route": '/plugins/42',
 					"icon": 'icon-edit',

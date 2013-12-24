@@ -27,6 +27,7 @@
 		"url": "https://github.com/akhoury/nodebb-plugin-42"
 	},
 	"dependencies": {
-		"async": "~0.2.9"
+		"async": "~0.2.9",
+		"tiny-logger": "*"
 	}
 }
