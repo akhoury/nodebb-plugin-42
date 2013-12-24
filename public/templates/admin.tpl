@@ -92,7 +92,7 @@
             <textarea class="form-control" data-field="nodebb-plugin-42:options:footerHtml" id="footerHtml" name="code">
 
             </textarea>
-    		<div class="note-42">HTML Editor by <a href="http://codemirror.net/">codemirror</a></div>
+    		<div class="note-42">HTML Editor by <a href="http://codemirror.net/" target="_blank">codemirror</a></div>
     	</label>
     </div>
 
