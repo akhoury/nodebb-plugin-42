@@ -70,9 +70,12 @@ var	fs = require('fs'),
 			function() {
 				(_self.config.navigation || []).forEach(function(item) {
 					custom_header.navigation.push({
-						"class": item.class || '',
 						"route": item.href,
-						"text": item.text
+						"text": item.text,
+						"title": item.title,
+						"class": item.class || '',
+						"textClass": item.textClass,
+						"iconClass": item.iconClass || ''
 					});
 				});
 				callback(null, custom_header);

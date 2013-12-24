@@ -67,9 +67,11 @@
 			<input type="text" class="form-control hide" data-field="nodebb-plugin-42:options:navigation" id="navigation" />
 
 			<input type="text" class="form-control navigation-42-link navigation-42-link-text" placeholder="Text" />
-			<input type="text" class="form-control navigation-42-link navigation-42-link-href" placeholder="Url" />
-			<input type="text" class="form-control navigation-42-link navigation-42-link-icon" placeholder="fa-icon" />
+			<input type="text" class="form-control navigation-42-link navigation-42-link-href" placeholder="http://site.com" />
+			<input type="text" class="form-control navigation-42-link navigation-42-link-icon-class" placeholder="fa-icon" />
 			<input type="text" class="form-control navigation-42-link navigation-42-link-title" placeholder="Title" />
+			<input type="text" class="form-control navigation-42-link navigation-42-link-text-class" placeholder="<span> Class" />
+
 			<button class="btn btn-sm btn-default navigation-42-link navigation-42-add" type="button" title="Add link">
 				<i class="fa fa-plus"></i>
 			</button>
@@ -133,24 +135,26 @@
 			appendNavigationItem = (function(list, navMinusIcon) {
 				var textField = form.find('input.navigation-42-link-text');
 				var hrefField = form.find('input.navigation-42-link-href');
-				var iconField = form.find('input.navigation-42-link-icon');
+				var iconClassField = form.find('input.navigation-42-link-icon-class');
+				var textClassField = form.find('input.navigation-42-link-text-class');
 				var titleField = form.find('input.navigation-42-link-title');
 
 				return function(link, order) {
 
 					textField.val('');
 					hrefField.val('');
-					iconField.val('');
+					iconClassField.val('');
+					textClassField.val('');
 					titleField.val('');
 
 				 	var li = $('<li />').addClass('navigation-42-link-item');
 				 	if (order) li.append($('<span />').text(order + '-) '));
                     var a = $('<a />').addClass('navigation-42-link-item-a').attr('href', link.href).attr('title', link.title);
 
-                    if (link.icon)
-                    	a.append($('<i />').addClass('fa ' + link.icon));
+                    if (link.iconClass)
+                    	a.append($('<i />').addClass('fa ' + link.iconClass));
 
-                    li.append(a.append($('<span />').text(link.text)));
+                    li.append(a.append($('<span />').addClass(link.textClass).text(link.text)));
                     li.append(navMinusIcon);
                     li.find('.navigation-42-remove').on('click', removeNavigationItem);
                     list.append(li);
@@ -162,7 +166,8 @@
 				var list = form.find('ul.navigation-42-link-list');
 
 				var text = form.find('input.navigation-42-link-text').val();
-				var icon = form.find('input.navigation-42-link-icon').val();
+				var iconClass = form.find('input.navigation-42-link-icon-class').val();
+				var textClass = form.find('input.navigation-42-link-text-class').val();
 				var title = form.find('input.navigation-42-link-title').val();
 
 				form.find('label[for="navigation"] .invalid').removeClass('invalid');
@@ -174,11 +179,17 @@
 				}
 				if (!text && !icon) {
 					form.find('input.navigation-42-link-text').addClass('invalid');
-					form.find('input.navigation-42-link-icon').addClass('invalid');
+					form.find('input.navigation-42-link-icon-class').addClass('invalid');
 					return false;
 				}
 
-				appendNavigationItem({text: text, href: href, icon: icon, title: title}, list.find('li.navigation-42-link-item').length + 1);
+				appendNavigationItem({
+						text: text,
+						href: href,
+						iconClass: iconClass,
+						textClass: textClass,
+						title: title
+					}, list.find('li.navigation-42-link-item').length + 1);
 			});
 
 			save42Btn.on('click', function(e) {
@@ -189,7 +200,13 @@
 				items.each(function(i, item) {
 					console.log(i);
 					var a = $(item).find('a.navigation-42-link-item-a');
-                	itemsVal.push({text: a.text(), href: a.attr('href'), title: a.attr('title'), icon: (a.find('i').attr('class') || '').split(' ')[1]});
+                	itemsVal.push({
+                			text: a.text(),
+                			href: a.attr('href'),
+                			title: a.attr('title'),
+                			iconClass: (a.find('i').attr('class') || '').split(' ')[1],
+                			textClass: a.find('span').attr('class') || ''
+                		});
 				});
 				itemsVal = JSON.stringify(itemsVal);
 				form.find('input#navigation').val(itemsVal);
