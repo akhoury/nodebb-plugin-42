@@ -46,6 +46,13 @@
 	}
 	.CodeMirror {
 		background: rgb(230, 230, 230);
+		max-height: 200px;
+	}
+	label {
+		display: block;
+	}
+	label[for='copyright'] .CodeMirror {
+		max-height: 50px;
 	}
 </style>
 
@@ -87,20 +94,35 @@
 		</label>
 	</div>
 
+	<div class="form-group">
+		<label for="footerHtml">
+			<p>Prepend custom HTML to the footer</p>
+			<textarea class="form-control" name="code" data-field="nodebb-plugin-42:options:footerHtml" id="footerHtml"></textarea>
+			<div class="note-42">Leave blank to do nothing</div>
+		</label>
+	</div>
+
 
 	<div class="form-group">
-    	<label for="footerHtml">
-    		<p>Prepend custom HTML to the footer</p>
-            <textarea class="form-control" data-field="nodebb-plugin-42:options:footerHtml" id="footerHtml" name="code">
+		<label for="copyright">
+			<p>Replace the NodeBB Copyright HTML *</p>
+            <textarea class="form-control" name="code" data-field="nodebb-plugin-42:options:copyright" id="copyright"></textarea>
+			<div class="note-42">leave blank to keep the NodeBB's default - I highly recommend linking to <a target="_blank" href="http://www.nodebb.com">NodeBB</a> to show some gratitude.</div>
+		</label>
+	</div>
 
-            </textarea>
-    		<div class="note-42">HTML Editor by <a href="http://codemirror.net/" target="_blank">codemirror</a></div>
-    	</label>
-    </div>
+	<div class="form-group">
+		<label for="bodyAppend">
+			<p>Append HTML to the body on document.ready *</p>
+            <textarea class="form-control" name="code" data-field="nodebb-plugin-42:options:bodyAppend" id="bodyAppend"></textarea>
+			<div class="note-42">leave blank to do nothing.</div>
+		</label>
+	</div>
 
     <hr />
 
 	<p><small>* It's hacky, NodeBB doesn't support that natively, so <a href="https://github.com/akhoury/nodebb-plugin-42/issues" target="_blank">file an issue</a> if it stops working after a NodeBB update</small></p>
+	<p><small>HTML Editors by <a href="http://codemirror.net/" target="_blank">codemirror</a></small></p>
 
     <hr />
 
@@ -118,6 +140,13 @@
 			saveBtn = form.find('#save'),
 
 			footerHtmlEditor,
+			copyrightEditor,
+			bodyAppendEditor,
+
+			trim = function (str){
+				return (str || '').replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+			},
+
 			parse = function(str){
 				try {
 					str = JSON.parse(str);
@@ -161,6 +190,10 @@
 				};
 
 			})(form.find('ul.navigation-42-link-list'), form.find('.navigation-remove-html-holder').html());
+
+			window.footerHtmlEditor = footerHtmlEditor;
+			window.copyrightEditor = copyrightEditor;
+			window.bodyAppendEditor = bodyAppendEditor;
 
 			form.find('.navigation-42-add').on('click', function(e) {
 				var list = form.find('ul.navigation-42-link-list');
@@ -210,7 +243,10 @@
 				});
 				itemsVal = JSON.stringify(itemsVal);
 				form.find('input#navigation').val(itemsVal);
+
 				form.find('textarea#footerHtml').val(footerHtmlEditor.getValue());
+				form.find('textarea#copyright').val(copyrightEditor.getValue());
+				form.find('textarea#bodyAppend').val(bodyAppendEditor.getValue());
 
 				saveBtn.trigger('click');
 			});
@@ -230,7 +266,12 @@
 				}
 
 				footerHtmlEditor = CodeMirror.fromTextArea(document.getElementById("footerHtml"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
-				footerHtmlEditor.setValue(form.find('textarea#footerHtml').val() || "");
+				copyrightEditor = CodeMirror.fromTextArea(document.getElementById("copyright"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
+				bodyAppendEditor = CodeMirror.fromTextArea(document.getElementById("bodyAppend"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
+
+				footerHtmlEditor.setValue(trim(form.find('textarea#footerHtml').val()) || "");
+				copyrightEditor.setValue(trim(form.find('textarea#copyright').val()) || "");
+				bodyAppendEditor.setValue(trim(form.find('textarea#bodyAppend').val()) || "");
         	});
  	});
 </script>

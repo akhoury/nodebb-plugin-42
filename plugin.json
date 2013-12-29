@@ -20,6 +20,8 @@
 	"defaults": {
 		"brandUrl": "",
 		"navigation": "[]",
-		"footerHtml": ""
+		"footerHtml": "",
+		"copyright": "",
+		"bodyAppend": ""
 	}
 }
