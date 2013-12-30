@@ -142,7 +142,6 @@ var	fs = require('fs'),
 			},
 			function() {
 				custom_footer = _self.config.footerHtml || '';
-
 				if (_self.config.brandUrl || _self.config.copyright) {
 					custom_footer += ''
 						+ '\n\n\n\t\t<!-- [' + pluginData.id + '] "much hack, so last minute, so many scared, wow" -doge, 2013-nye -->'
@@ -150,8 +149,8 @@ var	fs = require('fs'),
 						+ '\n\t\t\t$(function() {'
 
 						+ (_self.config.brandUrl ?
-							+ ''
-							+ '\n\t\t\t\t$(".navbar-header").find(".forum-logo, .forum-title").each(function(i, el) {'
+							
+							'\n\t\t\t\t$(".navbar-header").find(".forum-logo, .forum-title").each(function(i, el) {'
 							+ '\n\t\t\t\t\t\t$(el).parents("a").eq(0).attr("href", "' + _self.config.brandUrl + '");'
 							+ '\n\t\t\t\t});' :
 							'')

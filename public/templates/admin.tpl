@@ -254,24 +254,28 @@
 
 			require(['forum/admin/settings'], function(Settings) {
         		Settings.prepare();
+			
+			
+			setTimeout(function(){
 
-        		// set ui nav links
-        		var list = form.find('ul.navigation-42-link-list'),
-					links = parse(form.find('input#navigation').val());
+                        // set ui nav links
+                        var list = form.find('ul.navigation-42-link-list'),
+                                        links = parse(form.find('input#navigation').val());
 
-				if (links && links.length) {
-					links.forEach(function(link, i){
-						appendNavigationItem(link, i + 1);
-					});
-				}
+                                if (links && links.length) {
+                                        links.forEach(function(link, i){
+                                                appendNavigationItem(link, i + 1);
+                                        });
+                                }
 
-				footerHtmlEditor = CodeMirror.fromTextArea(document.getElementById("footerHtml"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
-				copyrightEditor = CodeMirror.fromTextArea(document.getElementById("copyright"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
-				bodyAppendEditor = CodeMirror.fromTextArea(document.getElementById("bodyAppend"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
+                                footerHtmlEditor = CodeMirror.fromTextArea(document.getElementById("footerHtml"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
+                                copyrightEditor = CodeMirror.fromTextArea(document.getElementById("copyright"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
+                                bodyAppendEditor = CodeMirror.fromTextArea(document.getElementById("bodyAppend"), {mode: {name: "htmlmixed"}, tabMode: "indent"});
 
-				footerHtmlEditor.setValue(trim(form.find('textarea#footerHtml').val()) || "");
-				copyrightEditor.setValue(trim(form.find('textarea#copyright').val()) || "");
-				bodyAppendEditor.setValue(trim(form.find('textarea#bodyAppend').val()) || "");
+                                footerHtmlEditor.setValue(trim(form.find('textarea#footerHtml').val()) || "");
+                                copyrightEditor.setValue(trim(form.find('textarea#copyright').val()) || "");
+                                bodyAppendEditor.setValue(trim(form.find('textarea#bodyAppend').val()) || "");
+			}, 2000);
         	});
  	});
 </script>
