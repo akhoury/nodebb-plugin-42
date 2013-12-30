@@ -210,7 +210,7 @@
 					form.find('input.navigation-42-link-href').addClass('invalid');
 					return false;
 				}
-				if (!text && !icon) {
+				if (!text && !iconClass) {
 					form.find('input.navigation-42-link-text').addClass('invalid');
 					form.find('input.navigation-42-link-icon-class').addClass('invalid');
 					return false;
