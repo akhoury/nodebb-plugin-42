@@ -1,4 +1,3 @@
-
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/codemirror.js"></script>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/codemirror.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/mode/xml/xml.js"></script>
@@ -275,7 +274,7 @@
                                 footerHtmlEditor.setValue(trim(form.find('textarea#footerHtml').val()) || "");
                                 copyrightEditor.setValue(trim(form.find('textarea#copyright').val()) || "");
                                 bodyAppendEditor.setValue(trim(form.find('textarea#bodyAppend').val()) || "");
-			}, 2000);
+			}, 500);
         	});
  	});
 </script>
