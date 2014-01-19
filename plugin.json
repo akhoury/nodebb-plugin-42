@@ -1,7 +1,7 @@
 {
 	"id": "nodebb-plugin-42",
 	"name": "42",
-	"description": "customizing header and footer lil bit",
+	"description": "some few extra settings for the NodeBB's header, footer etc.",
 	"url": "https://github.com/akhoury/nodebb-plugin-42",
 	"library": "./42.js",
 	"staticDir": "./public",
@@ -19,7 +19,8 @@
 
 	"defaults": {
 		"brandUrl": "",
-		"navigation": "[]",
+		"headHtml": "",
+		"links": [],
 		"footerHtml": "",
 		"copyright": "",
 		"bodyAppend": ""

@@ -2,11 +2,29 @@ var	fs = require('fs'),
 	pluginData = require('./plugin.json'),
 	path = require('path'),
 	async = require('async'),
+	db = module.parent.require('./database'),
 	log = require('tiny-logger').init(process.env.NODE_ENV === 'development' ? 'debug' : 'info,warn,error', '[' + pluginData.id + ']'),
+	templates = module.parent.require('./../public/src/templates'),
 	meta = module.parent.require('./meta');
 
 (function(Plugin) {
 	Plugin.config = {};
+
+	Plugin.util = {
+		trim: function(str) {
+			return (str || '').replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		},
+		isNumber: function (n) {
+			return !isNaN(parseFloat(n)) && isFinite(n);
+		},
+		parseJSON: function(str){
+			try {
+				return JSON.parse(str);
+			} catch (e) {
+				return null;
+			}
+		}
+	};
 
 	Plugin.init = function(callback){
 		log.debug('init()');
@@ -16,15 +34,38 @@ var	fs = require('fs'),
 		meta.configs.getFields(hashes, function(err, options){
 			if (err) throw err;
 
-			for (field in options) {
-				meta.config[field] = options[field];
-			}
-			if (typeof _self.softInit == 'function') {
-				_self.softInit(callback);
-			} else if (typeof callback == 'function'){
-				callback();
-			}
+			async.series([
+				function(next) {
+					db.keys('plugin:config:' + pluginData.id + ':*', function(err, keys) {
 
+						async.each(keys, function(key, next) {
+							var shortKey = key.substring('plugin:config:'.length);
+							log.debug('loading: ' + key + ' as '+ shortKey);
+
+							db.getObject(key, function(err, val) {
+								if (err) {
+									log.debug(err + ' -- most likely not an object, benign error, will fix after resolution of: http://community.nodebb.org/topic/486');
+								} else {
+									log.debug('options setting: ' + shortKey);
+									options[shortKey] = val;
+								}
+								next();
+							});
+						}, next);
+					});
+				}],
+				function(err){
+					if (err) log.error(err);
+
+					for (field in options) {
+						meta.config[field] = options[field];
+					}
+					if (typeof _self.softInit == 'function') {
+						_self.softInit(callback);
+					} else if (typeof callback == 'function'){
+						callback();
+					}
+				});
 		});
 	};
 
@@ -36,29 +77,75 @@ var	fs = require('fs'),
 	};
 
 	Plugin.admin = {
+		saveOptions: function(options, callback) {
+			log.debug('saveOptions()');
+
+			async.each(Object.keys(options || {}),
+
+				function(field, next) {
+					var value = options[field];
+					log.debug('saving: ' + field + ' value: ' + value);
+					if (typeof value == 'string') {
+						// todo: these save under the global config object
+						// http://community.nodebb.org/topic/486/#3573
+						meta.configs.set(pluginData.id + ':options:' + field, value, next);
+					} else if (Array.isArray(value)) {
+						// these don't
+						var i = 0, saveValue = function(val, next) {
+							db.setObject('plugin:config:' + pluginData.id + ':options:' + field + ':' + i, val, function(err){
+								if(err) next(err);
+								db.setAdd('plugin:config:' + pluginData.id + ':options:' + field, i, next);
+							});
+							i++;
+						};
+						async.each(value, saveValue, next);
+					} else if (typeof value == 'object' && !!value) {
+						// neither do these
+						// wtf redis? can't have nested objects?
+						db.setObject('plugin:config:' + pluginData.id + ':options:' + field, value, next);
+					}
+				},
+				callback);
+		},
 		menu: function(custom_header) {
 			custom_header.plugins.push({
 				"route": '/plugins/' + pluginData.name,
-				"icon": 'icon-edit',
+				"icon": 'fa-edit',
 				"name": pluginData.name
 			});
 
 			return custom_header;
 		},
 		route: function(custom_routes, callback) {
+			var _self = this;
 			fs.readFile(path.join(__dirname, 'public/templates/admin.tpl'), function(err, tpl) {
 				if (err) console.log(err);
 
 				custom_routes.routes.push({
 					route: '/plugins/' + pluginData.name,
-					method: "get",
+					method: 'get',
 					options: function(req, res, callback) {
 						callback({
 							req: req,
 							res: res,
 							route: '/plugins/' + pluginData.name,
 							name: Plugin,
-							content: tpl
+							content: templates.prepare(tpl.toString()).parse(_self.config || pluginData.defaults)
+						});
+					}
+				});
+
+				custom_routes.api.push({
+					route: '/plugins/' + pluginData.name + '/save',
+					method: 'post',
+					callback: function(req, res, callback) {
+						Plugin.admin.saveOptions(req.body.options, function(err) {
+							if(err) {
+								return res.json(500, {message: err.message});
+							}
+							Plugin.init(function(){
+								callback({message: 'Options saved! If the changes do not reflect immediately on the forum, try restarting NodeBB and clearing your cache.'});
+							});
 						});
 					}
 				});
@@ -86,12 +173,22 @@ var	fs = require('fs'),
 		}
 
 		var prefix = pluginData.id + ':options:';
-		Object.keys(meta.config).forEach(function(field, i) {
-			var option, value;
+		Object.keys(meta.config).forEach(function(field) {
+			var option;
+
 			if (field.indexOf(pluginData.id + ':options:') === 0 ) {
 				option = field.slice(prefix.length);
-				value = meta.config[field];
-				_self.config[option] = option == 'navigation' ? JSON.parse(value || pluginData.defaults[option]) : _self.trim(value) || pluginData.defaults[option];
+
+				if (option.indexOf(':') > 0) {
+					// then it's a set field:i with an index, i.e 'links:0'
+					var parts = option.split(':');
+					if (!_self.config[parts[0]]) {
+						_self.config[parts[0]] = pluginData.defaults[parts[0]];
+					}
+					_self.config[parts[0]][parts[1]] = meta.config[field];
+				} else {
+					_self.config[option] = meta.config[field] || pluginData.defaults[option];
+				}
 			}
 		});
 		_self.initialized = true;
@@ -113,7 +210,7 @@ var	fs = require('fs'),
 				}
 			},
 			function() {
-				(_self.config.navigation || []).forEach(function(item) {
+				(_self.config.links || []).forEach(function(item) {
 					custom_header.navigation.push({
 						"route": item.href,
 						"text": item.text,
@@ -141,28 +238,28 @@ var	fs = require('fs'),
 				}
 			},
 			function() {
+				log.debug(JSON.stringify(_self.config));
 				custom_footer = _self.config.footerHtml || '';
+
 				if (_self.config.brandUrl || _self.config.copyright) {
 					custom_footer += ''
 						+ '\n\n\n\t\t<!-- [' + pluginData.id + '] "much hack, so last minute, so many scared, wow" -doge, 2013-nye -->'
 						+ '\n\t\t<script>'
 						+ '\n\t\t\t$(function() {'
-
 						+ (_self.config.brandUrl ?
-							
-							'\n\t\t\t\t$(".navbar-header").find(".forum-logo, .forum-title").each(function(i, el) {'
-							+ '\n\t\t\t\t\t\t$(el).parents("a").eq(0).attr("href", "' + _self.config.brandUrl + '");'
+						'\n\t\t\t\t$(".navbar-header").find(".forum-logo, .forum-title").each(function(i, el) {'
+							+ '\n\t\t\t\t\t$(el).parents("a").eq(0).attr("href", "' + _self.config.brandUrl + '");'
 							+ '\n\t\t\t\t});' :
-							'')
-
+						'')
 						+ (_self.config.copyright ?
-							'\n\t\t\t\t$("footer").find(".copyright").html("' + _self.config.copyright + '");' :
-							'')
-
+						'\n\t\t\t\t$("footer").find(".copyright").html("' + _self.config.copyright + '");' :
+						'')
+						+ (_self.config.headHtml ?
+						'\n\t\t\t\t$("head").append("' + _self.config.headHtml + '");' :
+						'')
 						+ (_self.config.bodyAppend ?
-							'\n\t\t\t\t$("body").append($("' + _self.config.bodyAppend + '"));' :
-							'')
-
+						'\n\t\t\t\t$("body").append("' + _self.config.bodyAppend + '");' :
+						'')
 						+ '\n\t\t\t});'
 						+ '\n\t\t</script>\n\n';
 				}
@@ -170,10 +267,6 @@ var	fs = require('fs'),
 				callback(null, custom_footer);
 			}
 		]);
-	};
-
-	Plugin.trim = function(str){
-		return (str || '').replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 	};
 
 	Plugin.init();

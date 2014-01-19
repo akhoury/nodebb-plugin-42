@@ -1,6 +1,6 @@
 {
 	"name": "nodebb-plugin-42",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "customizing header and footer lil bit",
 	"main": "42.js",
 	"scripts": {
