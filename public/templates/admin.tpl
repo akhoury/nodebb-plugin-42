@@ -109,7 +109,7 @@
 		<label for="headHtml">
 			<p>Append custom HTML to the head *</p>
 			<textarea class="form-control" name="code" id="headHtml">{headHtml}</textarea>
-			<div class="note">Leave blank to do nothing</div>
+			<div class="note"><b>Use double quotes " for your html tag's attributes, till <a href="https://github.com/akhoury/nodebb-plugin-42/issues/1">issue#1</a> is resolved.</b> -- Leave blank to do nothing</div>
 		</label>
 	</div>
 
@@ -117,7 +117,7 @@
 		<label for="footerHtml">
 			<p>Prepend custom HTML to the footer</p>
 			<textarea class="form-control" name="code" id="footerHtml">{footerHtml}</textarea>
-			<div class="note">Leave blank to do nothing</div>
+			<div class="note"><b>Use double quotes " for your html tag's attributes, till <a href="https://github.com/akhoury/nodebb-plugin-42/issues/1">issue#1</a> is resolved.</b> -- Leave blank to do nothing</div>
 		</label>
 	</div>
 
@@ -126,7 +126,7 @@
 		<label for="copyright">
 			<p>Replace the NodeBB Copyright HTML *</p>
             <textarea class="form-control" name="code" id="copyright">{copyright}</textarea>
-			<div class="note">leave blank to keep the NodeBB's default - I highly recommend linking to <a target="_blank" href="http://www.nodebb.com">NodeBB</a> to show some gratitude.</div>
+			<div class="note"><b>Use double quotes " for your html tag's attributes, till <a href="https://github.com/akhoury/nodebb-plugin-42/issues/1">issue#1</a> is resolved.</b> -- leave blank to keep the NodeBB's default - I highly recommend linking to <a target="_blank" href="http://www.nodebb.com">NodeBB</a> to show some gratitude.</div>
 		</label>
 	</div>
 
@@ -134,7 +134,7 @@
 		<label for="bodyAppend">
 			<p>Append HTML to the body on document.ready *</p>
             <textarea class="form-control" name="code" id="bodyAppend">{bodyAppend}</textarea>
-			<div class="note">leave blank to do nothing.</div>
+			<div class="note"><b>Use double quotes " for your html tag's attributes, till <a href="https://github.com/akhoury/nodebb-plugin-42/issues/1">issue#1</a> is resolved.</b> - leave blank to do nothing.</div>
 		</label>
 	</div>
 

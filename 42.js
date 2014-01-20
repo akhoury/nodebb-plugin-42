@@ -2,6 +2,7 @@ var	fs = require('fs'),
 	pluginData = require('./plugin.json'),
 	path = require('path'),
 	async = require('async'),
+	$ = require('cheerio'),
 	db = module.parent.require('./database'),
 	log = require('tiny-logger').init(process.env.NODE_ENV === 'development' ? 'debug' : 'info,warn,error', '[' + pluginData.id + ']'),
 	templates = module.parent.require('./../public/src/templates'),
@@ -191,10 +192,42 @@ var	fs = require('fs'),
 				}
 			}
 		});
-		_self.initialized = true;
+
+		this._generateCustomFooter();
+		this.initialized = true;
+
 		if (typeof callback == 'function') {
 			callback();
 		}
+	};
+
+	Plugin._generateCustomFooter = function(){
+		var re = /(\r\n|\n|\r)/gm,
+			custom_footer = this.config.footerHtml || '';
+
+		if (this.config.brandUrl || this.config.copyright || this.config.headHtml || this.config.bodyAppend) {
+			custom_footer += ''
+				+ '\n\n\n\t\t<!-- [' + pluginData.id + '] \'much hack, so last minute, so many scared, wow\' -doge, 2013-nye -->'
+				+ '\n\t\t<script>'
+				+ '\n\t\t\t$(function() {'
+				+ (this.config.brandUrl ?
+				'\n\t\t\t\t$(\'.navbar-header\').find(\'.forum-logo, .forum-title\').each(function(i, el) {'
+					+ '\n\t\t\t\t\t$(el).parents(\'a\').eq(0).attr(\'href\', \'' + this.config.brandUrl + '\');'
+					+ '\n\t\t\t\t});' :
+				'')
+				+ (this.config.copyright ?
+				'\n\t\t\t\t$(\'footer\').find(\'.copyright\').html(\'' + $('<p>' + this.config.copyright.replace(re, '') + '</p>').html() + '\');' :
+				'')
+				+ (this.config.headHtml ?
+				'\n\t\t\t\t$(\'head\').append(\'' + $('<p>'  + this.config.headHtml.replace(re, '') + '</p>').html() + '\');' :
+				'')
+				+ (this.config.bodyAppend ?
+				'\n\t\t\t\t$(\'body\').append(\'' + $('<p>' + this.config.bodyAppend.replace(re, '') + '</p>').html() + '\');' :
+				'')
+				+ '\n\t\t\t});'
+				+ '\n\t\t</script>\n\n';
+		}
+		this._custom_footer = custom_footer;
 	};
 
 	Plugin.header = function(custom_header, callback) {
@@ -238,32 +271,7 @@ var	fs = require('fs'),
 				}
 			},
 			function() {
-				log.debug(JSON.stringify(_self.config));
-				custom_footer = _self.config.footerHtml || '';
-
-				if (_self.config.brandUrl || _self.config.copyright) {
-					custom_footer += ''
-						+ '\n\n\n\t\t<!-- [' + pluginData.id + '] "much hack, so last minute, so many scared, wow" -doge, 2013-nye -->'
-						+ '\n\t\t<script>'
-						+ '\n\t\t\t$(function() {'
-						+ (_self.config.brandUrl ?
-						'\n\t\t\t\t$(".navbar-header").find(".forum-logo, .forum-title").each(function(i, el) {'
-							+ '\n\t\t\t\t\t$(el).parents("a").eq(0).attr("href", "' + _self.config.brandUrl + '");'
-							+ '\n\t\t\t\t});' :
-						'')
-						+ (_self.config.copyright ?
-						'\n\t\t\t\t$("footer").find(".copyright").html("' + _self.config.copyright + '");' :
-						'')
-						+ (_self.config.headHtml ?
-						'\n\t\t\t\t$("head").append("' + _self.config.headHtml + '");' :
-						'')
-						+ (_self.config.bodyAppend ?
-						'\n\t\t\t\t$("body").append("' + _self.config.bodyAppend + '");' :
-						'')
-						+ '\n\t\t\t});'
-						+ '\n\t\t</script>\n\n';
-				}
-
+				custom_footer += _self._custom_footer || '';
 				callback(null, custom_footer);
 			}
 		]);

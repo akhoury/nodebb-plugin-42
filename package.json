@@ -1,6 +1,6 @@
 {
 	"name": "nodebb-plugin-42",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "customizing header and footer lil bit",
 	"main": "42.js",
 	"scripts": {
@@ -28,6 +28,7 @@
 	},
 	"dependencies": {
 		"async": "~0.2.9",
-		"tiny-logger": "*"
+		"tiny-logger": "*",
+		"cheerio": "0.13.1"
 	}
 }
