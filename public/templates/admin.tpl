@@ -224,7 +224,7 @@
 								  var linkData = {
 									  text: trim(link.find('a').text()),
 									  href: link.find('a').attr('href'),
-									  iconClass: link.find('a i').attr('class').replace('fa ', ''),
+									  iconClass: (link.find('a i').attr('class')|| '').replace('fa ', ''),
 									  title: link.find('a').attr('title'),
 									  textClass: link.find('a span').attr('class'),
 								  };
