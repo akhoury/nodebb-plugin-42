@@ -9,20 +9,22 @@
 		"css/default.css"
 	],
 	"hooks": [
-		{ "hook": "filter:header.build", "method": "header", "callbacked": true },
-		{ "hook": "filter:footer.build", "method": "footer", "callbacked": true },
-		{ "hook": "filter:admin.header.build", "method": "admin.menu", "callbacked": false },
-		{ "hook": "filter:admin.create_routes", "method": "admin.route", "callbacked": true },
-		{ "hook": "action:plugin.activate", "method": "admin.activate" },
-		{ "hook": "action:config.set", "method": "reload" }
-	],
+		{ "hook": "filter:header.build", "method": "forum.header", "callbacked": true },
+		{ "hook": "filter:footer.build", "method": "forum.footer", "callbacked": true },
+		{ "hook": "filter:scripts.get", "method": "forum.scripts", "callbacked": false },
 
+		{ "hook": "filter:admin.header.build", "method": "admin.menu", "callbacked": false },
+		{ "hook": "filter:admin.create_routes", "method": "admin.route", "callbacked": true }
+	],
 	"defaults": {
-		"brandUrl": "",
-		"headHtml": "",
 		"links": [],
 		"footerHtml": "",
+		"brandUrl": "",
+		"headHtml": "",
 		"copyright": "",
-		"bodyAppend": ""
-	}
+		"bodyAppend": "",
+		"timestamp": 0
+	},
+	"js": [],
+	"fa-icon": "fa-edit"
 }

@@ -27,8 +27,6 @@
 		"url": "https://github.com/akhoury/nodebb-plugin-42"
 	},
 	"dependencies": {
-		"async": "~0.2.9",
-		"tiny-logger": "*",
-		"cheerio": "0.13.1"
+		"fs-extra": "~0.8.1"
 	}
 }
