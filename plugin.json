@@ -3,16 +3,16 @@
 	"name": "42",
 	"description": "some few extra settings for the NodeBB's header, footer etc.",
 	"url": "https://github.com/akhoury/nodebb-plugin-42",
-	"library": "./42.js",
+	"library": "./library.js",
 	"staticDir": "./public",
 	"css": [
 		"css/default.css"
 	],
 	"hooks": [
+		{ "hook": "action:app.load", "method": "admin.init", "callbacked": false },
+		{ "hook": "filter:scripts.get", "method": "forum.scripts", "callbacked": false },
 		{ "hook": "filter:header.build", "method": "forum.header", "callbacked": true },
 		{ "hook": "filter:footer.build", "method": "forum.footer", "callbacked": true },
-		{ "hook": "filter:scripts.get", "method": "forum.scripts", "callbacked": false },
-
 		{ "hook": "filter:admin.header.build", "method": "admin.menu", "callbacked": false },
 		{ "hook": "filter:admin.create_routes", "method": "admin.route", "callbacked": true }
 	],
