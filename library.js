@@ -8,6 +8,8 @@ var	fs = require('fs-extra'),
 	utils = module.parent.require('./../public/src/utils'),
 	meta = module.parent.require('./meta'),
 	debug = process.env.NODE_ENV === 'development',
+    //todo: don't use the file system pls, kthxbai
+    jsonFile = path.join(__dirname, '../../.42.config.json'),
 
 	Plugin = {
 
@@ -79,7 +81,7 @@ var	fs = require('fs-extra'),
 		admin: {
 			init: function(app, callback) {
 				if (debug) winston.info('[' + pluginData.id + '] initializing');
-				fs.readJson(path.join(__dirname, '/config.json'), function(err, config){
+				fs.readJson(jsonFile, function(err, config){
 					if (err) { 
 						winston.error('[' + pluginData.id + ']' + err);
 						config = {};
@@ -177,7 +179,7 @@ var	fs = require('fs-extra'),
 				var options = req.body.options;
 
 				options.timestamp = +new Date();
-				fs.outputJson(path.join(__dirname, '/config.json'), utils.merge({}, pluginData.defaults, options), function(err){
+				fs.outputJson(jsonFile, utils.merge({}, pluginData.defaults, options), function(err){
 					if(err) {
 						return res.json(500, {message: err.message});
 					}
