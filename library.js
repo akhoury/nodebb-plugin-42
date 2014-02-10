@@ -52,15 +52,15 @@ var	fs = require('fs-extra'),
 			},
 
 			footer: function(custom_footer, callback) {
-                var footer = function(){
-                    custom_footer += Plugin.config.footerHtml || '';
+                var footer = function(config){
+                    custom_footer += config.footerHtml || '';
                     callback(null, custom_footer);
                 };
 
                 if (this.initialized) {
-                    footer();
+                    footer(Plugin.config);
                 } else {
-                    this.admin.init(null, footer);
+                    Plugin.admin._read(footer);
                 }
 			},
 
@@ -81,10 +81,7 @@ var	fs = require('fs-extra'),
 		admin: {
 			init: function(app, callback) {
 				if (debug) winston.info('[' + pluginData.id + '] initializing');
-				fs.readJson(jsonFile, function(err, config){
-					if (err) { 
-						config = {};
-					}
+				Plugin._read.readJson(function(config){
 					Plugin.config = utils.merge({}, pluginData.defaults, config);
 
 					Plugin.admin._write(function(err) {
@@ -98,6 +95,15 @@ var	fs = require('fs-extra'),
 					});
 				});
 			},
+
+            _read: function(callback){
+                fs.readJson(jsonFile, function(err, config){
+                    if (err) {
+                        config = {};
+                    }
+                    callback(config);
+                });
+            },
 
 			_write: function(callback) {
 				var publicPath = path.join(__dirname, 'public');
