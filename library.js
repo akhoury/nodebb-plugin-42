@@ -72,7 +72,10 @@ var	fs = require('fs-extra'),
 			init: function(app, callback) {
 				if (debug) winston.info('[' + pluginData.id + '] initializing');
 				fs.readJson(path.join(__dirname, '/config.json'), function(err, config){
-					if (err) winston.error('[' + pluginData.id + ']' + err);
+					if (err) { 
+						winston.error('[' + pluginData.id + ']' + err);
+						config = {};
+					}
 					Plugin.config = utils.merge({}, pluginData.defaults, config);
 
 					Plugin.admin._write(function(err) {
