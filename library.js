@@ -50,8 +50,16 @@ var	fs = require('fs-extra'),
 			},
 
 			footer: function(custom_footer, callback) {
-				custom_footer += Plugin.config.footerHtml || '';
-				callback(null, custom_footer);
+                var footer = function(){
+                    custom_footer += Plugin.config.footerHtml || '';
+                    callback(null, custom_footer);
+                };
+
+                if (this.initialized) {
+                    footer();
+                } else {
+                    this.admin.init(null, footer);
+                }
 			},
 
 			scripts: function(scripts){
@@ -79,7 +87,11 @@ var	fs = require('fs-extra'),
 					Plugin.config = utils.merge({}, pluginData.defaults, config);
 
 					Plugin.admin._write(function(err) {
-						if (err) winston.error('[' + pluginData.id + ']' + err);
+						if (err) {
+                            winston.error('[' + pluginData.id + ']' + err);
+                        } else {
+                            Plugin.initialized = true;
+                        }
 						if (typeof callback == 'function')
 							callback();
 					});
