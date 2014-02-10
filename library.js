@@ -83,7 +83,6 @@ var	fs = require('fs-extra'),
 				if (debug) winston.info('[' + pluginData.id + '] initializing');
 				fs.readJson(jsonFile, function(err, config){
 					if (err) { 
-						winston.error('[' + pluginData.id + ']' + err);
 						config = {};
 					}
 					Plugin.config = utils.merge({}, pluginData.defaults, config);

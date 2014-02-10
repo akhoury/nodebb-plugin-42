@@ -12,7 +12,7 @@
 		{ "hook": "action:app.load", "method": "admin.init", "callbacked": false },
 		{ "hook": "filter:scripts.get", "method": "forum.scripts", "callbacked": false },
 		{ "hook": "filter:header.build", "method": "forum.header", "callbacked": true },
-		{ "hook": "filter:footer.build", "method": "forum.footer", "callbacked": true, "priority": 9 },
+		{ "hook": "filter:footer.build", "method": "forum.footer", "callbacked": true},
 		{ "hook": "filter:admin.header.build", "method": "admin.menu", "callbacked": false },
 		{ "hook": "filter:admin.create_routes", "method": "admin.route", "callbacked": true }
 	],
