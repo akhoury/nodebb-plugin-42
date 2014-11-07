@@ -1,9 +1,3 @@
-nodebb-plugin-42
-================
+# NOT MAINTAINED!
 
-customizing header and footer and some other stuff
-
-### NodeBB Version
-tested with NodeBB 0.3.1
-
-![Imgur](http://i.imgur.com/wSsY0XD.png)
+no need for this anymore, NodeBB supports custom JS and custom CSS in the admin panel
